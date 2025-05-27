@@ -1,16 +1,24 @@
-# don’t commit Python lib folders
-# Vendored Python dependencies in services (installed via pip -t)
-services/*/boto3/
-services/*/botocore/
-services/*/requests/
-services/*/urllib3/
-services/*/s3transfer/
-services/*/six/
-services/*/dateutil/
-services/*/jmespath/
-services/*/python_dateutil*/
-services/*/*.dist-info/
+# Ignore all vendored deps under each service
+services/fetcher/**
+services/analyzer/**
+services/api/**
+services/notify/**
 
-# Byte-compiled / cache files
+# Except our own code & requirements for each
+!services/fetcher/handler.py
+!services/fetcher/requirements.txt
+
+!services/analyzer/handler.py
+!services/analyzer/requirements.txt
+!services/analyzer/strategies/
+!services/analyzer/strategies/**
+
+!services/api/handler.py
+!services/api/requirements.txt
+
+!services/notify/handler.py
+!services/notify/requirements.txt
+
+# And clean up bytecode
 **/__pycache__/
 **/*.pyc

@@ -1,0 +1,717 @@
+{
+  "service": {
+    "service": "crypto-alert-app",
+    "serviceObject": {
+      "name": "crypto-alert-app"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "python3.9",
+      "region": "us-east-1",
+      "profile": "23718874208",
+      "environment": {
+        "CONFIG_TABLE": "crypto-alert-app-config",
+        "ALERT_TOPIC_ARN": {
+          "Ref": "AlertTopic"
+        }
+      },
+      "stage": "dev",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "FetcherLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/crypto-alert-app-dev-fetcher"
+            }
+          },
+          "AnalyzerLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/crypto-alert-app-dev-analyzer"
+            }
+          },
+          "ApiLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/crypto-alert-app-dev-api"
+            }
+          },
+          "NotifyLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/crypto-alert-app-dev-notify"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "crypto-alert-app",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/crypto-alert-app-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/crypto-alert-app-dev*:*:*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "crypto-alert-app",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "FetcherLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
+                "S3Key": "serverless/crypto-alert-app/dev/1748369509842-2025-05-27T18:11:49.842Z/crypto-alert-app.zip"
+              },
+              "Handler": "services/fetcher/handler.handler",
+              "Runtime": "python3.9",
+              "FunctionName": "crypto-alert-app-dev-fetcher",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "CONFIG_TABLE": "crypto-alert-app-config",
+                  "ALERT_TOPIC_ARN": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"ALERT_TOPIC_ARN\"]"
+                  },
+                  "ANALYZER_FUNCTION_NAME": "crypto-alert-app-dev-analyzer"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "FetcherLogGroup"
+            ]
+          },
+          "AnalyzerLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
+                "S3Key": "serverless/crypto-alert-app/dev/1748369509842-2025-05-27T18:11:49.842Z/crypto-alert-app.zip"
+              },
+              "Handler": "services/analyzer/handler.handler",
+              "Runtime": "python3.9",
+              "FunctionName": "crypto-alert-app-dev-analyzer",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "CONFIG_TABLE": "crypto-alert-app-config",
+                  "ALERT_TOPIC_ARN": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"ALERT_TOPIC_ARN\"]"
+                  }
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "AnalyzerLogGroup"
+            ]
+          },
+          "ApiLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
+                "S3Key": "serverless/crypto-alert-app/dev/1748369509842-2025-05-27T18:11:49.842Z/crypto-alert-app.zip"
+              },
+              "Handler": "services/api/handler.handler",
+              "Runtime": "python3.9",
+              "FunctionName": "crypto-alert-app-dev-api",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "CONFIG_TABLE": "crypto-alert-app-config",
+                  "ALERT_TOPIC_ARN": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"ALERT_TOPIC_ARN\"]"
+                  }
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ApiLogGroup"
+            ]
+          },
+          "NotifyLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
+                "S3Key": "serverless/crypto-alert-app/dev/1748369509842-2025-05-27T18:11:49.842Z/crypto-alert-app.zip"
+              },
+              "Handler": "services/notify/handler.handler",
+              "Runtime": "python3.9",
+              "FunctionName": "crypto-alert-app-dev-notify",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "CONFIG_TABLE": "crypto-alert-app-config",
+                  "ALERT_TOPIC_ARN": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"ALERT_TOPIC_ARN\"]"
+                  },
+                  "EMAIL_FROM": "alerts@yourdomain.com",
+                  "EMAIL_TO": "youremail@example.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "NotifyLogGroup"
+            ]
+          },
+          "FetcherLambdaVersionGRqWMRwUlyOFDrJovm8aTzl3IKcvJZYHrhHq3OkLwAA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "FetcherLambdaFunction"
+              },
+              "CodeSha256": "NZ6M/wKGgUl8+jpD0f+9Si8jMbR9jztuTDN+aRLvAr8="
+            }
+          },
+          "AnalyzerLambdaVersionqblbbOEdyDN9Tja0T72wTphrCa709SjzJRfUsF5I": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AnalyzerLambdaFunction"
+              },
+              "CodeSha256": "NZ6M/wKGgUl8+jpD0f+9Si8jMbR9jztuTDN+aRLvAr8="
+            }
+          },
+          "ApiLambdaVersion5Q5qYR3AfZ6zcX0OKgnJaa1FFbA2i63p3G1gnro": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ApiLambdaFunction"
+              },
+              "CodeSha256": "NZ6M/wKGgUl8+jpD0f+9Si8jMbR9jztuTDN+aRLvAr8="
+            }
+          },
+          "NotifyLambdaVersionFITUL3h60PiKJZ1erov52FQil9tVKqQx3eTG6dkmS4": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "NotifyLambdaFunction"
+              },
+              "CodeSha256": "NZ6M/wKGgUl8+jpD0f+9Si8jMbR9jztuTDN+aRLvAr8="
+            }
+          },
+          "FetcherEventsRuleSchedule1": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+              "ScheduleExpression": "rate(1 minute)",
+              "State": "ENABLED",
+              "Targets": [
+                {
+                  "Arn": {
+                    "Fn::GetAtt": [
+                      "FetcherLambdaFunction",
+                      "Arn"
+                    ]
+                  },
+                  "Id": "fetcherSchedule"
+                }
+              ]
+            }
+          },
+          "FetcherLambdaPermissionEventsRuleSchedule1": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "FetcherLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "events.amazonaws.com",
+              "SourceArn": {
+                "Fn::GetAtt": [
+                  "FetcherEventsRuleSchedule1",
+                  "Arn"
+                ]
+              }
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-crypto-alert-app",
+              "ProtocolType": "HTTP"
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              }
+            }
+          },
+          "ApiLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ApiLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationApi": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"ApiLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteDefault": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "$default",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationApi"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationApi"
+          },
+          "ConfigTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "crypto-alert-app-config",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "ticker",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "ticker",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
+            }
+          },
+          "AlertTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+              "TopicName": "crypto-alert-app-dev-alerts"
+            }
+          },
+          "NotifySubscription": {
+            "Type": "AWS::SNS::Subscription",
+            "Properties": {
+              "TopicArn": {
+                "Ref": "AlertTopic"
+              },
+              "Protocol": "lambda",
+              "Endpoint": {
+                "Fn::GetAtt": [
+                  "NotifyLambdaFunction",
+                  "Arn"
+                ]
+              }
+            }
+          },
+          "PermissionForSNSInvokeLambda": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "NotifyLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "sns.amazonaws.com",
+              "SourceArn": {
+                "Ref": "AlertTopic"
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
+            "Export": {
+              "Name": "sls-crypto-alert-app-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "FetcherLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "FetcherLambdaVersionGRqWMRwUlyOFDrJovm8aTzl3IKcvJZYHrhHq3OkLwAA"
+            },
+            "Export": {
+              "Name": "sls-crypto-alert-app-dev-FetcherLambdaFunctionQualifiedArn"
+            }
+          },
+          "AnalyzerLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "AnalyzerLambdaVersionqblbbOEdyDN9Tja0T72wTphrCa709SjzJRfUsF5I"
+            },
+            "Export": {
+              "Name": "sls-crypto-alert-app-dev-AnalyzerLambdaFunctionQualifiedArn"
+            }
+          },
+          "ApiLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ApiLambdaVersion5Q5qYR3AfZ6zcX0OKgnJaa1FFbA2i63p3G1gnro"
+            },
+            "Export": {
+              "Name": "sls-crypto-alert-app-dev-ApiLambdaFunctionQualifiedArn"
+            }
+          },
+          "NotifyLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "NotifyLambdaVersionFITUL3h60PiKJZ1erov52FQil9tVKqQx3eTG6dkmS4"
+            },
+            "Export": {
+              "Name": "sls-crypto-alert-app-dev-NotifyLambdaFunctionQualifiedArn"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-crypto-alert-app-dev-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-crypto-alert-app-dev-HttpApiUrl"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "pluginsData": {},
+    "functions": {
+      "fetcher": {
+        "handler": "services/fetcher/handler.handler",
+        "environment": {
+          "ANALYZER_FUNCTION_NAME": "crypto-alert-app-dev-analyzer"
+        },
+        "events": [
+          {
+            "schedule": "rate(1 minute)"
+          }
+        ],
+        "name": "crypto-alert-app-dev-fetcher",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "python3.9",
+        "vpc": {},
+        "versionLogicalId": "FetcherLambdaVersionGRqWMRwUlyOFDrJovm8aTzl3IKcvJZYHrhHq3OkLwAA"
+      },
+      "analyzer": {
+        "handler": "services/analyzer/handler.handler",
+        "events": [],
+        "name": "crypto-alert-app-dev-analyzer",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "python3.9",
+        "vpc": {},
+        "versionLogicalId": "AnalyzerLambdaVersionqblbbOEdyDN9Tja0T72wTphrCa709SjzJRfUsF5I"
+      },
+      "api": {
+        "handler": "services/api/handler.handler",
+        "events": [
+          {
+            "httpApi": "*",
+            "resolvedMethod": "ANY"
+          }
+        ],
+        "name": "crypto-alert-app-dev-api",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "python3.9",
+        "vpc": {},
+        "versionLogicalId": "ApiLambdaVersion5Q5qYR3AfZ6zcX0OKgnJaa1FFbA2i63p3G1gnro"
+      },
+      "notify": {
+        "handler": "services/notify/handler.handler",
+        "environment": {
+          "EMAIL_FROM": "alerts@yourdomain.com",
+          "EMAIL_TO": "youremail@example.com"
+        },
+        "events": [],
+        "name": "crypto-alert-app-dev-notify",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "python3.9",
+        "vpc": {},
+        "versionLogicalId": "NotifyLambdaVersionFITUL3h60PiKJZ1erov52FQil9tVKqQx3eTG6dkmS4"
+      }
+    },
+    "resources": {
+      "Resources": {
+        "ConfigTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "crypto-alert-app-config",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "ticker",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "ticker",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+          }
+        },
+        "AlertTopic": {
+          "Type": "AWS::SNS::Topic",
+          "Properties": {
+            "TopicName": "crypto-alert-app-dev-alerts"
+          }
+        },
+        "NotifySubscription": {
+          "Type": "AWS::SNS::Subscription",
+          "Properties": {
+            "TopicArn": {
+              "Ref": "AlertTopic"
+            },
+            "Protocol": "lambda",
+            "Endpoint": {
+              "Fn::GetAtt": [
+                "NotifyLambdaFunction",
+                "Arn"
+              ]
+            }
+          }
+        },
+        "PermissionForSNSInvokeLambda": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "NotifyLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "sns.amazonaws.com",
+            "SourceArn": {
+              "Ref": "AlertTopic"
+            }
+          }
+        }
+      },
+      "Outputs": {}
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless",
+    "initialServerlessConfig": {
+      "service": "crypto-alert-app",
+      "frameworkVersion": "4",
+      "package": {
+        "patterns": [
+          "../services/**"
+        ],
+        "artifactsS3KeyDirname": "serverless/crypto-alert-app/dev/code-artifacts",
+        "deploymentBucket": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
+        "artifact": "/Users/tbienapfl/Downloads/crypto-alert-app/infra/.serverless/crypto-alert-app.zip",
+        "artifactDirectoryName": "serverless/crypto-alert-app/dev/1748369509842-2025-05-27T18:11:49.842Z"
+      },
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
+      }
+    },
+    "appId": null,
+    "orgId": null,
+    "layers": {},
+    "artifact": "/Users/tbienapfl/Downloads/crypto-alert-app/infra/.serverless/crypto-alert-app.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/crypto-alert-app/dev/1748369509842-2025-05-27T18:11:49.842Z",
+    "artifact": "crypto-alert-app.zip"
+  }
+}
