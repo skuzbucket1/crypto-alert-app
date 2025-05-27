@@ -1,0 +1,10 @@
+{
+  "name": "crypto-alert-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "deploy": "cd infra && npx serverless deploy"
+  }
+}

@@ -1,0 +1,50 @@
+service: crypto-alert-app
+frameworkVersion: '3'
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  environment:
+    CONFIG_TABLE: ${self:service}-config
+    ALERT_TOPIC_ARN: { "Ref": AlertTopic }
+
+functions:
+  fetcher:
+    handler: services/fetcher/handler.handler
+    events:
+      - schedule: rate(1 minute)
+  analyzer:
+    handler: services/analyzer/handler.handler
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - "aws.events"
+            detail-type:
+              - "Scheduled Event"
+  api:
+    handler: services/api/handler.handler
+    events:
+      - httpApi: '*'
+  notify:
+    handler: services/notify/handler.handler
+    events:
+      - sns: ${self:provider.environment.ALERT_TOPIC_ARN}
+
+resources:
+  Resources:
+    ConfigTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.CONFIG_TABLE}
+        AttributeDefinitions:
+          - AttributeName: ticker
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ticker
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    AlertTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:service}-alerts
