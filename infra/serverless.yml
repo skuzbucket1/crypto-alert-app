@@ -14,6 +14,7 @@ provider:
   iam:
     role:
       statements:
+        # Permissions for DynamoDB config table
         - Effect: Allow
           Action:
             - dynamodb:Scan
@@ -23,6 +24,12 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:service}-config"
+        # Allow fetcher to invoke the analyzer Lambda
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource:
+            - "arn:aws:lambda:${self:provider.region}:${aws:accountId}:function:${self:service}-${opt:stage,'dev'}-analyzer"
 
   environment:
     CONFIG_TABLE: ${self:service}-config
