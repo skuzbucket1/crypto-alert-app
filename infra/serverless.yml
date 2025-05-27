@@ -1,7 +1,6 @@
 service: crypto-alert-app
 frameworkVersion: '4'
 
-# ← NEW: include everything under ../services in your Lambda bundles
 package:
   patterns:
     - '../services/**'
@@ -11,6 +10,20 @@ provider:
   runtime: python3.9
   region: us-east-1
   profile: 023718874208
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:service}-config"
+
   environment:
     CONFIG_TABLE: ${self:service}-config
     ALERT_TOPIC_ARN:
@@ -37,7 +50,7 @@ functions:
     environment:
       EMAIL_FROM: "alerts@yourdomain.com"
       EMAIL_TO:   "youremail@example.com"
-    # subscription is still done via resources below
+    # subscription is set up below in resources
 
 resources:
   Resources:
@@ -61,7 +74,8 @@ resources:
     NotifySubscription:
       Type: AWS::SNS::Subscription
       Properties:
-        TopicArn: { Ref: AlertTopic }
+        TopicArn:
+          Ref: AlertTopic
         Protocol: lambda
         Endpoint:
           Fn::GetAtt:

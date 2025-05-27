@@ -7,6 +7,11 @@ services/notify/**
 # Except our own code & requirements for each
 !services/fetcher/handler.py
 !services/fetcher/requirements.txt
+!services/fetcher/requests/
+!services/fetcher/urllib3/
+!services/fetcher/idna/
+!services/fetcher/certifi/
+!services/fetcher/charset_normalizer/
 
 !services/analyzer/handler.py
 !services/analyzer/requirements.txt
