@@ -1,35 +1,43 @@
 service: crypto-alert-app
-frameworkVersion: '3'
+frameworkVersion: '4'
+
+# ← NEW: include everything under ../services in your Lambda bundles
+package:
+  patterns:
+    - '../services/**'
+
 provider:
   name: aws
   runtime: python3.9
   region: us-east-1
+  profile: 023718874208
   environment:
     CONFIG_TABLE: ${self:service}-config
-    ALERT_TOPIC_ARN: { "Ref": AlertTopic }
+    ALERT_TOPIC_ARN:
+      Ref: AlertTopic
 
 functions:
   fetcher:
     handler: services/fetcher/handler.handler
+    environment:
+      ANALYZER_FUNCTION_NAME: ${self:service}-${opt:stage,'dev'}-analyzer
     events:
       - schedule: rate(1 minute)
+
   analyzer:
     handler: services/analyzer/handler.handler
-    events:
-      - eventBridge:
-          pattern:
-            source:
-              - "aws.events"
-            detail-type:
-              - "Scheduled Event"
+
   api:
     handler: services/api/handler.handler
     events:
       - httpApi: '*'
+
   notify:
     handler: services/notify/handler.handler
-    events:
-      - sns: ${self:provider.environment.ALERT_TOPIC_ARN}
+    environment:
+      EMAIL_FROM: "alerts@yourdomain.com"
+      EMAIL_TO:   "youremail@example.com"
+    # subscription is still done via resources below
 
 resources:
   Resources:
@@ -44,7 +52,30 @@ resources:
           - AttributeName: ticker
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+
     AlertTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: ${self:service}-alerts
+        TopicName: ${self:service}-${opt:stage,'dev'}-alerts
+
+    NotifySubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn: { Ref: AlertTopic }
+        Protocol: lambda
+        Endpoint:
+          Fn::GetAtt:
+            - NotifyLambdaFunction
+            - Arn
+
+    PermissionForSNSInvokeLambda:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName:
+          Fn::GetAtt:
+            - NotifyLambdaFunction
+            - Arn
+        Action: lambda:InvokeFunction
+        Principal: sns.amazonaws.com
+        SourceArn:
+          Ref: AlertTopic

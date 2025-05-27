@@ -1,0 +1,16 @@
+# don’t commit Python lib folders
+# Vendored Python dependencies in services (installed via pip -t)
+services/*/boto3/
+services/*/botocore/
+services/*/requests/
+services/*/urllib3/
+services/*/s3transfer/
+services/*/six/
+services/*/dateutil/
+services/*/jmespath/
+services/*/python_dateutil*/
+services/*/*.dist-info/
+
+# Byte-compiled / cache files
+**/__pycache__/
+**/*.pyc
