@@ -1,0 +1,1 @@
+{"statusCode": 200, "body": "{\"alerts\": [{\"ticker\": \"BTC\", \"signal\": \"SELL\", \"algo\": \"mean_reversion\", \"price\": 60000, \"time\": \"2025-05-27T12:00:00Z\"}]}"}

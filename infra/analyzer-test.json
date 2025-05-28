@@ -1,0 +1,9 @@
+[
+  {
+    "ticker": "BTC",
+    "price": 60000,
+    "previous_price": 59000,
+    "time": "2025-05-27T12:00:00Z",
+    "threshold": 0.02
+  }
+]

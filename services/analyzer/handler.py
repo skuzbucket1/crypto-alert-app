@@ -1,4 +1,5 @@
-import os
+import os, sys
+sys.path.insert(0, os.path.dirname(__file__))
 import json
 import boto3
 from strategies.momentum import check as momentum_check

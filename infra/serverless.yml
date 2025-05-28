@@ -14,7 +14,7 @@ provider:
   iam:
     role:
       statements:
-        # Permissions for DynamoDB config table
+        # DynamoDB table access for config
         - Effect: Allow
           Action:
             - dynamodb:Scan
@@ -24,12 +24,28 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:service}-config"
-        # Allow fetcher to invoke the analyzer Lambda
+
+        # Allow fetcher to invoke analyzer
         - Effect: Allow
           Action:
             - lambda:InvokeFunction
           Resource:
             - "arn:aws:lambda:${self:provider.region}:${aws:accountId}:function:${self:service}-${opt:stage,'dev'}-analyzer"
+
+        # Allow analyzer to publish to the SNS topic
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource:
+            - Ref: AlertTopic
+
+        # Allow notify Lambda to send email via SES
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource:
+            - "arn:aws:ses:${self:provider.region}:${aws:accountId}:identity/skuzbucket@gmail.com"
 
   environment:
     CONFIG_TABLE: ${self:service}-config
@@ -55,9 +71,9 @@ functions:
   notify:
     handler: services/notify/handler.handler
     environment:
-      EMAIL_FROM: "alerts@yourdomain.com"
-      EMAIL_TO:   "youremail@example.com"
-    # subscription is set up below in resources
+      EMAIL_FROM: "skuzbucket@gmail.com"
+      EMAIL_TO:   "skuzbucket@gmail.com"
+    # subscription handled below in resources
 
 resources:
   Resources:

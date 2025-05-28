@@ -94,6 +94,32 @@
                     "dynamodb:DeleteItem"
                   ],
                   "Resource": "arn:aws:dynamodb:us-east-1:023718874208:table/crypto-alert-app-config"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction"
+                  ],
+                  "Resource": "arn:aws:lambda:us-east-1:023718874208:function:crypto-alert-app-dev-analyzer"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sns:Publish"
+                  ],
+                  "Resource": [
+                    {
+                      "Ref": "AlertTopic"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ses:SendEmail",
+                    "ses:SendRawEmail"
+                  ],
+                  "Resource": "arn:aws:ses:us-east-1:023718874208:identity/skuzbucket@gmail.com"
                 }
               ]
             }
@@ -120,7 +146,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
-          "S3Key": "serverless/crypto-alert-app/dev/1748378342365-2025-05-27T20:39:02.365Z/crypto-alert-app.zip"
+          "S3Key": "serverless/crypto-alert-app/dev/1748436792544-2025-05-28T12:53:12.544Z/crypto-alert-app.zip"
         },
         "Handler": "services/fetcher/handler.handler",
         "Runtime": "python3.9",
@@ -152,7 +178,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
-          "S3Key": "serverless/crypto-alert-app/dev/1748378342365-2025-05-27T20:39:02.365Z/crypto-alert-app.zip"
+          "S3Key": "serverless/crypto-alert-app/dev/1748436792544-2025-05-28T12:53:12.544Z/crypto-alert-app.zip"
         },
         "Handler": "services/analyzer/handler.handler",
         "Runtime": "python3.9",
@@ -183,7 +209,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
-          "S3Key": "serverless/crypto-alert-app/dev/1748378342365-2025-05-27T20:39:02.365Z/crypto-alert-app.zip"
+          "S3Key": "serverless/crypto-alert-app/dev/1748436792544-2025-05-28T12:53:12.544Z/crypto-alert-app.zip"
         },
         "Handler": "services/api/handler.handler",
         "Runtime": "python3.9",
@@ -214,7 +240,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-25cb7bc0-9319",
-          "S3Key": "serverless/crypto-alert-app/dev/1748378342365-2025-05-27T20:39:02.365Z/crypto-alert-app.zip"
+          "S3Key": "serverless/crypto-alert-app/dev/1748436792544-2025-05-28T12:53:12.544Z/crypto-alert-app.zip"
         },
         "Handler": "services/notify/handler.handler",
         "Runtime": "python3.9",
@@ -227,8 +253,8 @@
             "ALERT_TOPIC_ARN": {
               "Ref": "AlertTopic"
             },
-            "EMAIL_FROM": "alerts@yourdomain.com",
-            "EMAIL_TO": "youremail@example.com"
+            "EMAIL_FROM": "skuzbucket@gmail.com",
+            "EMAIL_TO": "skuzbucket@gmail.com"
           }
         },
         "Role": {
@@ -242,44 +268,44 @@
         "NotifyLogGroup"
       ]
     },
-    "FetcherLambdaVersionzek5cARQM4IcHF6RsVeqmwkh4C5dBNs2Km15JDz1E": {
+    "FetcherLambdaVersionbDqG4GfR9yxVsLfM8Hxlgl8P8v4w6WuuWywiDmV8c": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "FetcherLambdaFunction"
         },
-        "CodeSha256": "RDX6bj7btxMf+UxxLPwyZN0aZPCykQtPDXe5s7miSSY="
+        "CodeSha256": "hQjKfJyD4TCwsAOS63wCU+nevgpWIOwqnUL2yJ/VaSE="
       }
     },
-    "AnalyzerLambdaVersion9crnZZnrmYQfDrvNzFf0benKa5gpDKL8u0WypJLXc": {
+    "AnalyzerLambdaVersionWcY5DaTodWxvPNsOFfqZju8MaXzboD2I4u167zR8": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "AnalyzerLambdaFunction"
         },
-        "CodeSha256": "RDX6bj7btxMf+UxxLPwyZN0aZPCykQtPDXe5s7miSSY="
+        "CodeSha256": "hQjKfJyD4TCwsAOS63wCU+nevgpWIOwqnUL2yJ/VaSE="
       }
     },
-    "ApiLambdaVersionHV1USgWVuujXWPuj8HuPRS6WuMUnLpNI8ciTZhgWQ": {
+    "ApiLambdaVersionW2onpQrGRl642nNyTydFZDdnMGCpC72nzwN6opUMFw": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ApiLambdaFunction"
         },
-        "CodeSha256": "RDX6bj7btxMf+UxxLPwyZN0aZPCykQtPDXe5s7miSSY="
+        "CodeSha256": "hQjKfJyD4TCwsAOS63wCU+nevgpWIOwqnUL2yJ/VaSE="
       }
     },
-    "NotifyLambdaVersiondftxwpvRfrLy2Xyu9xt5Pury6F23MB1fQ7DoEwdfA": {
+    "NotifyLambdaVersionxLcwnVcty8nZNhiNlYpiptQNM3luNgJZVVPyspnfM": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "NotifyLambdaFunction"
         },
-        "CodeSha256": "RDX6bj7btxMf+UxxLPwyZN0aZPCykQtPDXe5s7miSSY="
+        "CodeSha256": "hQjKfJyD4TCwsAOS63wCU+nevgpWIOwqnUL2yJ/VaSE="
       }
     },
     "FetcherEventsRuleSchedule1": {
@@ -481,7 +507,7 @@
     "FetcherLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "FetcherLambdaVersionzek5cARQM4IcHF6RsVeqmwkh4C5dBNs2Km15JDz1E"
+        "Ref": "FetcherLambdaVersionbDqG4GfR9yxVsLfM8Hxlgl8P8v4w6WuuWywiDmV8c"
       },
       "Export": {
         "Name": "sls-crypto-alert-app-dev-FetcherLambdaFunctionQualifiedArn"
@@ -490,7 +516,7 @@
     "AnalyzerLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "AnalyzerLambdaVersion9crnZZnrmYQfDrvNzFf0benKa5gpDKL8u0WypJLXc"
+        "Ref": "AnalyzerLambdaVersionWcY5DaTodWxvPNsOFfqZju8MaXzboD2I4u167zR8"
       },
       "Export": {
         "Name": "sls-crypto-alert-app-dev-AnalyzerLambdaFunctionQualifiedArn"
@@ -499,7 +525,7 @@
     "ApiLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ApiLambdaVersionHV1USgWVuujXWPuj8HuPRS6WuMUnLpNI8ciTZhgWQ"
+        "Ref": "ApiLambdaVersionW2onpQrGRl642nNyTydFZDdnMGCpC72nzwN6opUMFw"
       },
       "Export": {
         "Name": "sls-crypto-alert-app-dev-ApiLambdaFunctionQualifiedArn"
@@ -508,7 +534,7 @@
     "NotifyLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "NotifyLambdaVersiondftxwpvRfrLy2Xyu9xt5Pury6F23MB1fQ7DoEwdfA"
+        "Ref": "NotifyLambdaVersionxLcwnVcty8nZNhiNlYpiptQNM3luNgJZVVPyspnfM"
       },
       "Export": {
         "Name": "sls-crypto-alert-app-dev-NotifyLambdaFunctionQualifiedArn"
